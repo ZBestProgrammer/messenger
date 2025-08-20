@@ -13,7 +13,7 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=${DB_HOST}
+      - SPRING_DATASOURCE_URL=${DB_DOCKER_HOST}
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
 
