@@ -1,5 +1,7 @@
 package nesalmanov.ru.authservice.service;
 
+import jakarta.servlet.http.HttpServletResponse;
+import nesalmanov.ru.authservice.jwt.JwtUtils;
 import nesalmanov.ru.authservice.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.authservice.model.dto.request.UserRegisterRequest;
 import nesalmanov.ru.authservice.model.entity.User;
@@ -19,19 +21,22 @@ public class UserService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    private final JwtUtils jwtUtils;
+
+    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
-    public String login(UserLoginRequest userLoginRequest) {
+    public String login(UserLoginRequest userLoginRequest, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userLoginRequest.getUsername(), userLoginRequest.getPassword())
         );
 
         if (authentication.isAuthenticated()) {
-            return "Hello";
+            return jwtUtils.generateToken(userLoginRequest, response);
         }
         return "Bad credentials";
     }

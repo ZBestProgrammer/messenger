@@ -1,5 +1,6 @@
 package nesalmanov.ru.authservice.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import nesalmanov.ru.authservice.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.authservice.model.dto.request.UserRegisterRequest;
 import nesalmanov.ru.authservice.service.UserService;
@@ -22,8 +23,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserLoginRequest userLoginRequest) {
-        return userService.login(userLoginRequest);
+    public String login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response) {
+        return userService.login(userLoginRequest, response);
     }
 
     @PostMapping("/register")
