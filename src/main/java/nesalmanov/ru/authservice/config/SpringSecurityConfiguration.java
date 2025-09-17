@@ -36,7 +36,7 @@ public class SpringSecurityConfiguration {
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(new CookieCsrfTokenRepository())
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                         .sessionAuthenticationStrategy((authentication, request, response) -> {})
                 )

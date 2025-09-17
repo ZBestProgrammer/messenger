@@ -1,5 +1,6 @@
 package nesalmanov.ru.authservice.service;
 
+import nesalmanov.ru.authservice.jwt.JwtUtils;
 import nesalmanov.ru.authservice.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.authservice.model.dto.request.UserRegisterRequest;
 import nesalmanov.ru.authservice.model.entity.User;
@@ -19,10 +20,13 @@ public class UserService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    private final JwtUtils jwtUtils;
+
+    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
     public String login(UserLoginRequest userLoginRequest) {
@@ -31,7 +35,7 @@ public class UserService {
         );
 
         if (authentication.isAuthenticated()) {
-            return "Hello";
+            return jwtUtils.generateMobileToken(userLoginRequest);
         }
         return "Bad credentials";
     }
