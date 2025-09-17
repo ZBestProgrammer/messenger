@@ -1,6 +1,5 @@
 package nesalmanov.ru.authservice.service;
 
-import jakarta.servlet.http.HttpServletResponse;
 import nesalmanov.ru.authservice.jwt.JwtUtils;
 import nesalmanov.ru.authservice.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.authservice.model.dto.request.UserRegisterRequest;
@@ -30,13 +29,13 @@ public class UserService {
         this.jwtUtils = jwtUtils;
     }
 
-    public String login(UserLoginRequest userLoginRequest, HttpServletResponse response) {
+    public String login(UserLoginRequest userLoginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userLoginRequest.getUsername(), userLoginRequest.getPassword())
         );
 
         if (authentication.isAuthenticated()) {
-            return jwtUtils.generateToken(userLoginRequest, response);
+            return jwtUtils.generateMobileToken(userLoginRequest);
         }
         return "Bad credentials";
     }

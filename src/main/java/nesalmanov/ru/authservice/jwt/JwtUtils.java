@@ -20,14 +20,16 @@ public class JwtUtils {
     @Value("${jwt.private.key}")
     private String privateKey;
 
-    public String generateToken(UserLoginRequest userLoginRequest, HttpServletResponse response) {
+    private final int TOKEN_EXPIRATION = 60 * 60 * 1000;
+
+    public String generateWebToken(UserLoginRequest userLoginRequest, HttpServletResponse response) {
         Map<String, Object> claims = new HashMap<>();
         String token = Jwts.builder()
                 .claims()
                 .add(claims)
                 .subject(userLoginRequest.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()  + 60 * 60 * 1000))
+                .expiration(new Date(System.currentTimeMillis()  + TOKEN_EXPIRATION))
                 .and()
                 .signWith(getKey())
                 .compact();
@@ -39,6 +41,19 @@ public class JwtUtils {
         response.addCookie(cookie);
 
         return "Token in cookie";
+    }
+
+    public String generateMobileToken(UserLoginRequest userLoginRequest) {
+        Map<String, Object> claims = new HashMap<>();
+        return Jwts.builder()
+                .claims()
+                .add(claims)
+                .subject(userLoginRequest.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis()  + TOKEN_EXPIRATION))
+                .and()
+                .signWith(getKey())
+                .compact();
     }
 
     private SecretKey getKey() {
