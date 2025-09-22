@@ -1,15 +1,19 @@
 package nesalmanov.ru.authservice.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import nesalmanov.ru.authservice.model.dto.request.UserLoginRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +22,10 @@ import java.util.Map;
 public class JwtUtils {
 
     @Value("${jwt.private.key}")
-    private String privateKey;
+    private PrivateKey privateKey;
+
+    @Value("${jwt.public.key}")
+    private PublicKey publicKey;
 
     private final int TOKEN_EXPIRATION = 60 * 60 * 1000;
 
@@ -31,7 +38,7 @@ public class JwtUtils {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()  + TOKEN_EXPIRATION))
                 .and()
-                .signWith(getKey())
+                .signWith(privateKey)
                 .compact();
 
         Cookie cookie = new Cookie("jwt", token);
@@ -52,12 +59,42 @@ public class JwtUtils {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()  + TOKEN_EXPIRATION))
                 .and()
-                .signWith(getKey())
+                .signWith(publicKey)
                 .compact();
     }
 
-    private SecretKey getKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(privateKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    public String extractUsername(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(publicKey)
+                .build()
+                .parseSignedClaims(token).getPayload();
+        return claims.getSubject();
+
     }
+
+    private boolean isTokenExpired(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(publicKey)
+                .build()
+                .parseSignedClaims(token).getPayload();
+        Date expiration = claims.getExpiration();
+        return expiration.before(new Date());
+    }
+
+    public boolean validateToken(String token, UserDetails userDetails){
+        String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+//    private SecretKey getPrivateKey() {
+//        byte[] keyBytes = Decoders.BASE64.decode(privateKey);
+//        return
+//    }
+
+//    private PublicKey getPublicKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
+//        byte[] keyBytes = Decoders.BASE64.decode(publicKey);
+//        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+//        KeyFactory kf = KeyFactory.getInstance("RSA");
+//        return kf.generatePublic(spec);
+//    }
 }

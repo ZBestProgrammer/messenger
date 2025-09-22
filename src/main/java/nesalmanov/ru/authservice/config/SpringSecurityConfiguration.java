@@ -1,5 +1,6 @@
 package nesalmanov.ru.authservice.config;
 
+import nesalmanov.ru.authservice.jwt.JwtFilter;
 import nesalmanov.ru.authservice.service.impl.MyUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
@@ -20,9 +22,11 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 public class SpringSecurityConfiguration {
 
     private final MyUserDetailsService myUserDetailsService;
+    private final JwtFilter jwtFilter;
 
-    public SpringSecurityConfiguration(MyUserDetailsService myUserDetailsService) {
+    public SpringSecurityConfiguration(MyUserDetailsService myUserDetailsService, JwtFilter jwtFilter) {
         this.myUserDetailsService = myUserDetailsService;
+        this.jwtFilter = jwtFilter;
     }
 
 
@@ -40,6 +44,7 @@ public class SpringSecurityConfiguration {
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                         .sessionAuthenticationStrategy((authentication, request, response) -> {})
                 )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

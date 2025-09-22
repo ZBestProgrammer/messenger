@@ -31,5 +31,10 @@ public class UserController {
         return userService.register(userRegisterRequest);
     }
 
+    @GetMapping("/test")
+    public String test() {
+        return "Hello";
+    }
+
 }
 
