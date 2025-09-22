@@ -44,6 +44,7 @@ public class UserService {
         User newUser = new User();
         newUser.setUsername(userRegisterRequest.getUsername());
         newUser.setPassword(bCryptPasswordEncoder.encode(userRegisterRequest.getPassword()));
+        newUser.setAvatar(userRegisterRequest.getAvatar());
 
         try {
             userRepository.save(newUser);
