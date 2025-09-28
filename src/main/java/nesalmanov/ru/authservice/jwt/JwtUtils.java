@@ -5,14 +5,11 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import nesalmanov.ru.authservice.model.dto.request.UserLoginRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -21,13 +18,15 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    @Value("${jwt.private.key}")
-    private PrivateKey privateKey;
-
-    @Value("${jwt.public.key}")
-    private PublicKey publicKey;
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
 
     private final int TOKEN_EXPIRATION = 60 * 60 * 1000;
+
+    public JwtUtils(PrivateKey privateKey, PublicKey publicKey) {
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+    }
 
     public String generateWebToken(UserLoginRequest userLoginRequest, HttpServletResponse response) {
         Map<String, Object> claims = new HashMap<>();
@@ -59,7 +58,7 @@ public class JwtUtils {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()  + TOKEN_EXPIRATION))
                 .and()
-                .signWith(publicKey)
+                .signWith(privateKey)
                 .compact();
     }
 
