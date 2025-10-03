@@ -35,12 +35,22 @@ jobs:
     - name: Shutdown docker-compose
       run: docker-compose down
 
-    - name: Build & push Docker image
+    - name: Build & push auth Docker image
       uses: mr-smithers-excellent/docker-build-push@v5
       with:
         image: snariman/auth-service
         tags: latest
         registry: docker.io
         dockerfile: Dockerfile
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build & push chat Docker image
+      uses: mr-smithers-excellent/docker-build-push@v5
+      with:
+        image: snariman/chat-service
+        tags: latest
+        registry: docker.io
+        dockerfile: chat-service/Dockerfile
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
