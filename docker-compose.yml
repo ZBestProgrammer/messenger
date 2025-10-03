@@ -1,33 +1,61 @@
 version: "3.1"
 
 volumes:
-  db_data:
+  auth-db-data:
+  chat-db-data:
 
 services:
-  app:
+  auth-service:
     build:
-      context: .
+      context: auth-service
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      - auth-db
     environment:
-      - SPRING_DATASOURCE_URL=${DB_DOCKER_HOST}
+      - SPRING_DATASOURCE_URL=${AUTH_DB_DOCKER_HOST}
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - PRIVATE_KEY=${PRIVATE_KEY}
       - PUBLIC_KEY=${PUBLIC_KEY}
 
-  db:
+  chat-service:
+    build:
+      context: chat-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      - chat-db
+    environment:
+      - SPRING_DATASOURCE_URL=${CHAT_DB_DOCKER_HOST}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - PUBLIC_KEY=${PUBLIC_KEY}
+
+  auth-db:
     image: postgres
     restart: always
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_DB=${AUTH_POSTGRES_DB}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - auth-db-data:/var/lib/postgresql/data
       - ./db/script/:/docker-entrypoint-initdb.d/
     ports:
       - "127.0.0.1:5433:5432"
+
+  chat-db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${CHAT_POSTGRES_DB}
+    volumes:
+      - chat-db-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5434:5432"
