@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import nesalmanov.ru.auth_service.model.dto.request.UserLoginRequest;
+import nesalmanov.ru.auth_service.model.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -49,9 +50,10 @@ public class JwtUtils {
         return "Token in cookie";
     }
 
-    public String generateMobileToken(UserLoginRequest userLoginRequest) {
+    public String generateMobileToken(UserLoginRequest userLoginRequest, User user) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
+                .claim("UUID", String.valueOf(user.getId()))
                 .claims()
                 .add(claims)
                 .subject(userLoginRequest.getUsername())
@@ -85,15 +87,4 @@ public class JwtUtils {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-//    private SecretKey getPrivateKey() {
-//        byte[] keyBytes = Decoders.BASE64.decode(privateKey);
-//        return
-//    }
-
-//    private PublicKey getPublicKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
-//        byte[] keyBytes = Decoders.BASE64.decode(publicKey);
-//        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-//        KeyFactory kf = KeyFactory.getInstance("RSA");
-//        return kf.generatePublic(spec);
-//    }
 }
