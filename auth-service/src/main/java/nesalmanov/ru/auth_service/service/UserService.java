@@ -36,7 +36,8 @@ public class UserService {
         );
 
         if (authentication.isAuthenticated()) {
-            return jwtUtils.generateMobileToken(userLoginRequest);
+            User user = userRepository.findUserByUsername(userLoginRequest.getUsername());
+            return jwtUtils.generateMobileToken(userLoginRequest, user);
         }
         return "Bad credentials";
     }
