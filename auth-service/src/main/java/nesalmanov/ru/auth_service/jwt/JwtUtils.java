@@ -22,7 +22,7 @@ public class JwtUtils {
     private final PrivateKey privateKey;
     private final PublicKey publicKey;
 
-    private final int TOKEN_EXPIRATION = 60 * 60 * 1000;
+    private final int TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
 
     public JwtUtils(PrivateKey privateKey, PublicKey publicKey) {
         this.privateKey = privateKey;
