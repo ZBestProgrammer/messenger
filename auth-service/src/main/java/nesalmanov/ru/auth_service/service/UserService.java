@@ -2,8 +2,11 @@ package nesalmanov.ru.auth_service.service;
 
 
 import nesalmanov.ru.auth_service.jwt.JwtUtils;
+import nesalmanov.ru.auth_service.mapper.UserMapper;
+import nesalmanov.ru.auth_service.model.dto.request.GetUserRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserRegisterRequest;
+import nesalmanov.ru.auth_service.model.dto.response.UserResponse;
 import nesalmanov.ru.auth_service.model.entity.User;
 import nesalmanov.ru.auth_service.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +14,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -23,11 +28,14 @@ public class UserService {
 
     private final JwtUtils jwtUtils;
 
-    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtils jwtUtils) {
+    private final UserMapper userMapper;
+
+    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtils jwtUtils, UserMapper userMapper) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtUtils = jwtUtils;
+        this.userMapper = userMapper;
     }
 
     public String login(UserLoginRequest userLoginRequest) {
@@ -54,6 +62,12 @@ public class UserService {
         } catch (Exception e) {
             return "Error";
         }
+    }
+
+    public List<UserResponse> getUsers(GetUserRequest getUserRequest) {
+        List<User> users = userRepository.findByUsernameStartingWith(getUserRequest.getUsername());
+
+        return userMapper.usersToUserResponses(users);
     }
 
 }

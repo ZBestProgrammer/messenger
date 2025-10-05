@@ -1,11 +1,15 @@
 package nesalmanov.ru.auth_service.controller;
 
 
+import nesalmanov.ru.auth_service.model.dto.request.GetUserRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserRegisterRequest;
+import nesalmanov.ru.auth_service.model.dto.response.UserResponse;
 import nesalmanov.ru.auth_service.service.UserService;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -32,9 +36,9 @@ public class UserController {
         return userService.register(userRegisterRequest);
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "Hello";
+    @PostMapping("/getUsers")
+    public List<UserResponse> getUsers(@RequestBody GetUserRequest getUserRequest) {
+        return userService.getUsers(getUserRequest);
     }
 
 }
