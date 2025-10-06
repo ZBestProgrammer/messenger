@@ -2,6 +2,7 @@ package nesalmanov.ru.auth_service.controller;
 
 
 import nesalmanov.ru.auth_service.model.dto.request.GetUserRequest;
+import nesalmanov.ru.auth_service.model.dto.request.GetUsersRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserRegisterRequest;
 import nesalmanov.ru.auth_service.model.dto.response.UserResponse;
@@ -37,8 +38,13 @@ public class UserController {
     }
 
     @PostMapping("/getUsers")
-    public List<UserResponse> getUsers(@RequestBody GetUserRequest getUserRequest) {
+    public List<UserResponse> getUsers(@RequestBody GetUsersRequest getUserRequest) {
         return userService.getUsers(getUserRequest);
+    }
+
+    @PostMapping("/getUser")
+    public UserResponse getUser(@RequestBody GetUserRequest getUserRequest) {
+        return userService.getUser(getUserRequest);
     }
 
 }

@@ -1,13 +1,10 @@
 package nesalmanov.ru.auth_service.model.dto.request;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Getter
 @Setter
-public class GetUserRequest {
-    private UUID id;
+public class GetUsersRequest {
+    private String username;
 }

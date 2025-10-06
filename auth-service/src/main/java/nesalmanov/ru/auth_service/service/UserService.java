@@ -4,6 +4,7 @@ package nesalmanov.ru.auth_service.service;
 import nesalmanov.ru.auth_service.jwt.JwtUtils;
 import nesalmanov.ru.auth_service.mapper.UserMapper;
 import nesalmanov.ru.auth_service.model.dto.request.GetUserRequest;
+import nesalmanov.ru.auth_service.model.dto.request.GetUsersRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserLoginRequest;
 import nesalmanov.ru.auth_service.model.dto.request.UserRegisterRequest;
 import nesalmanov.ru.auth_service.model.dto.response.UserResponse;
@@ -64,10 +65,14 @@ public class UserService {
         }
     }
 
-    public List<UserResponse> getUsers(GetUserRequest getUserRequest) {
+    public List<UserResponse> getUsers(GetUsersRequest getUserRequest) {
         List<User> users = userRepository.findByUsernameStartingWith(getUserRequest.getUsername());
 
         return userMapper.usersToUserResponses(users);
+    }
+
+    public UserResponse getUser(GetUserRequest getUserRequest) {
+        return userMapper.userToUserResponse(userRepository.findUserById(getUserRequest.getId()));
     }
 
 }
