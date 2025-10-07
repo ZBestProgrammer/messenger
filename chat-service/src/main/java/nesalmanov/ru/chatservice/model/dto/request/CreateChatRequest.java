@@ -3,11 +3,13 @@ package nesalmanov.ru.chatservice.model.dto.request;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
 @Setter
 public class CreateChatRequest {
-    private UUID user1;
-    private UUID user2;
+    private List<UUID> users;
+    private String name;
+    private String avatar;
 }

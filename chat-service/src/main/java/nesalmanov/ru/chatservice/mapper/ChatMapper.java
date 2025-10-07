@@ -10,11 +10,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ChatMapper {
 
-    @Mapping(source = "user1", target = "user1")
-    @Mapping(source = "user2", target = "user2")
+    @Mapping(source = "chatId", target = "chatId")
     CreateChatResponse chatToCreateChatResponse(Chat chat);
 
-    @Mapping(source = "user1", target = "user1")
-    @Mapping(source = "user2", target = "user2")
+    @Mapping(source = "name", target = "name")
+    @Mapping(source = "avatar", target = "avatar")
     Chat createChatRequestToChat(CreateChatRequest createChatRequest);
 }

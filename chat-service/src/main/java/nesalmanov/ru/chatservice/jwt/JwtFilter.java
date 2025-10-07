@@ -5,7 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import nesalmanov.ru.chatservice.model.impl.ChatDetails;
+import nesalmanov.ru.chatservice.model.impl.TokenDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             if (jwtUtils.validateToken(token)) {
-                ChatDetails chatDetails = new ChatDetails(jwtUtils.extractUUID(token), username);
+                TokenDetails chatDetails = new TokenDetails(jwtUtils.extractUUID(token), username);
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(chatDetails, null, Collections.singleton(new SimpleGrantedAuthority("USER")));
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

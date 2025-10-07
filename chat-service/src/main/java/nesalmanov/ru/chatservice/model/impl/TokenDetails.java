@@ -11,12 +11,12 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ChatDetails implements UserDetails {
+public class TokenDetails implements UserDetails {
 
     private UUID uuid;
     private String username;
 
-    public ChatDetails(UUID uuid, String username) {
+    public TokenDetails(UUID uuid, String username) {
         this.uuid = uuid;
         this.username = username;
     }

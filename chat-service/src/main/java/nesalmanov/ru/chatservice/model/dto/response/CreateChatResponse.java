@@ -9,6 +9,5 @@ import java.util.UUID;
 @Getter
 @Setter
 public class CreateChatResponse extends Response{
-    private UUID user1;
-    private UUID user2;
+    private UUID chatId;
 }
