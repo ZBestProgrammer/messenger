@@ -1,10 +1,15 @@
 package nesalmanov.ru.chatservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import nesalmanov.ru.chatservice.kafka.producer.UserUuidKafkaProducer;
+import nesalmanov.ru.chatservice.kafka.reply_producer.UserUuidKafkaProducer;
 import nesalmanov.ru.chatservice.mapper.ChatMapper;
+import nesalmanov.ru.chatservice.model.dto.kafka.UserChatsInfo;
+import nesalmanov.ru.chatservice.model.dto.kafka.UserChatsResponse;
 import nesalmanov.ru.chatservice.model.dto.request.CreateChatRequest;
+import nesalmanov.ru.chatservice.model.dto.kafka.UsersUuidRequest;
 import nesalmanov.ru.chatservice.model.dto.response.Response;
 import nesalmanov.ru.chatservice.model.entity.Chat;
 import nesalmanov.ru.chatservice.model.entity.ExtObject;
@@ -18,9 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Service
 @Slf4j
@@ -36,18 +41,28 @@ public class ChatService {
 
     private final UserUuidKafkaProducer userUuidKafkaProducer;
 
+    private final ObjectMapper objectMapper;
+
     private final ChatMapper chatMapper;
 
-    public ChatService(ChatRepository chatRepository, ExtObjectRepository extObjectRepository, GenericTypeRepository genericTypeRepository, UserChatRepository userChatRepository, UserUuidKafkaProducer userUuidKafkaProducer, ChatMapper chatMapper) {
+    public ChatService(ChatRepository chatRepository,
+                       ExtObjectRepository extObjectRepository,
+                       GenericTypeRepository genericTypeRepository,
+                       UserChatRepository userChatRepository,
+                       UserUuidKafkaProducer userUuidKafkaProducer,
+                       ObjectMapper objectMapper,
+                       ChatMapper chatMapper
+    ) {
         this.chatRepository = chatRepository;
         this.extObjectRepository = extObjectRepository;
         this.genericTypeRepository = genericTypeRepository;
         this.userChatRepository = userChatRepository;
         this.userUuidKafkaProducer = userUuidKafkaProducer;
+        this.objectMapper = objectMapper;
         this.chatMapper = chatMapper;
     }
 
-    public List<Chat> getChats() {
+    public List<UserChatsInfo> getChats() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         TokenDetails tokenDetails = (TokenDetails) authentication.getPrincipal();
 
@@ -60,9 +75,14 @@ public class ChatService {
             }
         }
 
-        userUuidKafkaProducer.sendUserUuidToKafka(users);
+        UsersUuidRequest usersUuid = new UsersUuidRequest();
+        usersUuid.setUsers(users);
 
-        return chats;
+        String userResponses = userUuidKafkaProducer.sendUserUuidToKafka(usersUuid);
+
+
+
+        return objectMapper.readValue(userResponses, UserChatsResponse.class).getUsersInfo();
 
     }
 
@@ -73,6 +93,17 @@ public class ChatService {
 
         List<UUID> users = createChatRequest.getUsers();
         users.add(chatDetails.getUuid());
+
+        if (users.size() == 2) {
+            List<Chat> currentUserChats = chatRepository.findAllChatsByUserId(chatDetails.getUuid());
+            List<Chat> userChats = chatRepository.findAllChatsByUserId(users.get(0));
+
+            for (Chat chat : userChats) {
+                if (currentUserChats.contains(chat)) {
+                    return Response.isError("Chat already exist");
+                }
+            }
+        }
 
         Chat newChat = chatMapper.createChatRequestToChat(createChatRequest);
         newChat = chatRepository.save(newChat);

@@ -13,6 +13,7 @@ services:
       - "8080:8080"
     depends_on:
       - auth-db
+      - kafka
     environment:
       - SPRING_DATASOURCE_URL=${AUTH_DB_DOCKER_HOST}
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}

@@ -1,5 +1,6 @@
 package nesalmanov.ru.auth_service.mapper;
 
+import nesalmanov.ru.auth_service.model.dto.kafka.UsersInfo;
 import nesalmanov.ru.auth_service.model.dto.response.UserResponse;
 import nesalmanov.ru.auth_service.model.entity.User;
 import org.mapstruct.Mapper;
@@ -14,4 +15,6 @@ public interface UserMapper {
     @Mapping(source = "username", target = "username")
     @Mapping(source = "avatar", target = "avatar")
     List<UserResponse> usersToUserResponses(List<User> users);
+
+    UsersInfo userToUsersInfo(User user);
 }
