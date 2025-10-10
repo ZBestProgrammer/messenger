@@ -52,16 +52,18 @@ public class UserService {
     }
 
     public String register(UserRegisterRequest userRegisterRequest) {
-        User newUser = new User();
-        newUser.setUsername(userRegisterRequest.getUsername());
-        newUser.setPassword(bCryptPasswordEncoder.encode(userRegisterRequest.getPassword()));
-        newUser.setAvatar(userRegisterRequest.getAvatar());
 
-        try {
+        if (userRepository.findUserByUsername(userRegisterRequest.getUsername()) == null) {
+            User newUser = new User();
+            newUser.setUsername(userRegisterRequest.getUsername());
+            newUser.setPassword(bCryptPasswordEncoder.encode(userRegisterRequest.getPassword()));
+            newUser.setAvatar(userRegisterRequest.getAvatar());
+
             userRepository.save(newUser);
+
             return "Success";
-        } catch (Exception e) {
-            return "Error";
+        } else {
+            return "User with this username already exist";
         }
     }
 
