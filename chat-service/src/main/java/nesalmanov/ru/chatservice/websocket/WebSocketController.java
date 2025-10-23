@@ -34,7 +34,7 @@ public class WebSocketController {
                 chatService.saveMessage(messageDTO, tokenDetails.getUuid());
 
                 List<String> recipients = chatService.getRecipientsInChat(
-                        messageDTO.getChatId(), messageDTO.getSenderId()
+                        messageDTO.getChatId(), tokenDetails.getUuid()
                 );
                 log.info(messageDTO.getContent());
                 for (String userId : recipients) {
