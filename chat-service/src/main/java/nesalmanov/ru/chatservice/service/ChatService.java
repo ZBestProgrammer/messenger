@@ -103,11 +103,11 @@ public class ChatService {
                 .toList();
     }
 
-    public void saveMessage(ChatMessageDTO chatMessageDTO) {
+    public void saveMessage(ChatMessageDTO chatMessageDTO, UUID currentUserUuid) {
         Message message = new Message();
         Chat chat = chatRepository.findChatByChatId(chatMessageDTO.getChatId());
         message.setChatId(chat);
-        Optional<ExtObject> extObject = extObjectRepository.findByExtId(chatMessageDTO.getSenderId());
+        Optional<ExtObject> extObject = extObjectRepository.findByExtId(currentUserUuid);
         message.setSenderId(extObject.get());
         message.setContent(chatMessageDTO.getContent());
         message.setSentAt(OffsetDateTime.now());
