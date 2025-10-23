@@ -11,18 +11,18 @@ import nesalmanov.ru.chatservice.model.dto.kafka.UserChatsResponse;
 import nesalmanov.ru.chatservice.model.dto.request.CreateChatRequest;
 import nesalmanov.ru.chatservice.model.dto.kafka.UsersUuidRequest;
 import nesalmanov.ru.chatservice.model.dto.response.Response;
+import nesalmanov.ru.chatservice.model.dto.websocket.ChatMessageDTO;
 import nesalmanov.ru.chatservice.model.entity.Chat;
 import nesalmanov.ru.chatservice.model.entity.ExtObject;
+import nesalmanov.ru.chatservice.model.entity.Message;
 import nesalmanov.ru.chatservice.model.entity.UserChat;
 import nesalmanov.ru.chatservice.model.impl.TokenDetails;
-import nesalmanov.ru.chatservice.repository.ChatRepository;
-import nesalmanov.ru.chatservice.repository.ExtObjectRepository;
-import nesalmanov.ru.chatservice.repository.GenericTypeRepository;
-import nesalmanov.ru.chatservice.repository.UserChatRepository;
+import nesalmanov.ru.chatservice.repository.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -32,6 +32,8 @@ import java.util.concurrent.TimeoutException;
 public class ChatService {
 
     private final ChatRepository chatRepository;
+
+    private final MessageRepository messageRepository;
 
     private final ExtObjectRepository extObjectRepository;
 
@@ -46,6 +48,7 @@ public class ChatService {
     private final ChatMapper chatMapper;
 
     public ChatService(ChatRepository chatRepository,
+                       MessageRepository messageRepository,
                        ExtObjectRepository extObjectRepository,
                        GenericTypeRepository genericTypeRepository,
                        UserChatRepository userChatRepository,
@@ -54,6 +57,7 @@ public class ChatService {
                        ChatMapper chatMapper
     ) {
         this.chatRepository = chatRepository;
+        this.messageRepository = messageRepository;
         this.extObjectRepository = extObjectRepository;
         this.genericTypeRepository = genericTypeRepository;
         this.userChatRepository = userChatRepository;
@@ -80,10 +84,35 @@ public class ChatService {
 
         String userResponses = userUuidKafkaProducer.sendUserUuidToKafka(usersUuid);
 
+        UserChatsResponse userChatsResponse = objectMapper.readValue(userResponses, UserChatsResponse.class);
 
+        for (UserChatsInfo chatsInfo : userChatsResponse.getUsersInfo()) {
+            Optional<UUID> chatUuid = userChatRepository.findChatIdByUsers(tokenDetails.getUuid(), chatsInfo.getId());
 
-        return objectMapper.readValue(userResponses, UserChatsResponse.class).getUsersInfo();
+            chatUuid.ifPresent(chatsInfo::setChatId);
+        }
 
+        return userChatsResponse.getUsersInfo();
+
+    }
+
+    public List<String> getRecipientsInChat(UUID chatId, UUID senderId) {
+        return chatRepository.findAllUserIdsByChatIdExceptUser(chatId, senderId)
+                .stream()
+                .map(UUID::toString)
+                .toList();
+    }
+
+    public void saveMessage(ChatMessageDTO chatMessageDTO) {
+        Message message = new Message();
+        Chat chat = chatRepository.findChatByChatId(chatMessageDTO.getChatId());
+        message.setChatId(chat);
+        Optional<ExtObject> extObject = extObjectRepository.findByExtId(chatMessageDTO.getSenderId());
+        message.setSenderId(extObject.get());
+        message.setContent(chatMessageDTO.getContent());
+        message.setSentAt(OffsetDateTime.now());
+
+        messageRepository.save(message);
     }
 
     @Transactional

@@ -17,4 +17,7 @@ public interface ChatRepository extends JpaRepository<Chat, UUID> {
 
     @Query("select uc.userId.extId from UserChat uc where uc.chatId.chatId = :chatId and uc.userId.extId <> :currentUserId")
     List<UUID> findAllUserIdsByChatIdExceptUser(@Param("chatId") UUID chatId, @Param("currentUserId") UUID currentUserId);
+
+    Chat findChatByChatId(UUID chatId);
+
 }

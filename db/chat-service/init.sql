@@ -16,6 +16,15 @@ create table ext_objects (
 );
 
 create table users_chats (
+    id uuid primary key,
     user_id uuid references ext_objects (ext_id),
     chat_id uuid references chats (chat_id)
+);
+
+create table messages (
+    message_id uuid primary key default gen_random_uuid(),
+    chat_id uuid not null references chats (chat_id) on delete cascade,
+    sender_id uuid not null references ext_objects (ext_id),
+    content text not null,
+    sent_at timestamptz not null default now()
 );
