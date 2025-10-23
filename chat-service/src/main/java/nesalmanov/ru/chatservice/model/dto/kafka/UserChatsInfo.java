@@ -11,6 +11,7 @@ import java.util.UUID;
 public class UserChatsInfo {
 
     private UUID id;
+    private UUID chatId;
     private String username;
     private String avatar;
 
