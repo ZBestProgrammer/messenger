@@ -33,7 +33,7 @@ public class TokenDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return uuid.toString();
     }
 
     @Override

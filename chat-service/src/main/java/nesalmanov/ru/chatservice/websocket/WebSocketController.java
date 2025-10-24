@@ -38,7 +38,7 @@ public class WebSocketController {
                 );
                 log.info(messageDTO.getContent());
                 for (String userId : recipients) {
-                    if (!userId.equals(messageDTO.getSenderId().toString())) {
+                    if (!userId.equals(tokenDetails.getUuid().toString())) {
                         simpMessagingTemplate.convertAndSendToUser(
                                 userId,
                                 "/queue/chat/" + messageDTO.getChatId(),
